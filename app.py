@@ -3,7 +3,7 @@ from io import BytesIO
 import re
 import fitz
 from PIL import Image, ImageOps, UnidentifiedImageError
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, send_from_directory
 
 ROOT = Path(__file__).resolve().parent
 app = Flask(__name__)
@@ -89,6 +89,12 @@ def generate(data, photos):
     result = doc.tobytes(garbage=4,deflate=True)
     doc.close()
     return result
+
+@app.get('/fonts/<name>')
+def web_font(name):
+    if name not in ('Pretendard-Medium.otf', 'Pretendard-ExtraBold.otf'):
+        return '', 404
+    return send_from_directory(ROOT / 'assets', name, mimetype='font/otf', max_age=31536000)
 
 @app.get('/')
 def index():
