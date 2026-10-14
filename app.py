@@ -119,7 +119,7 @@ def pdf():
     except (ValueError,UnidentifiedImageError,Image.DecompressionBombError) as error:
         return str(error),400
     name = re.sub(r'[\\/:*?"<>|\x00-\x1f]','_',data['team_name'])
-    return send_file(BytesIO(result),mimetype='application/pdf',as_attachment=True,download_name=f'현장체험_보고서_{data["team_number"]}조_{name}.pdf')
+    return send_file(BytesIO(result),mimetype='application/pdf',as_attachment=True,download_name=f'현장체험보고서_{data["team_number"]}조_{name}.pdf')
 
 @app.errorhandler(413)
 def too_large(error):
