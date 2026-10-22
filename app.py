@@ -63,12 +63,14 @@ def generate(data, photos):
     for i in range(3):
         top = 580+166*i
         block(data[f'place_{i}'],(66,top+10,247,top+156),20,'center')
-        bullets = [data[f'insight_{i}_{j}'] for j in range(2)]
+        bullets = [data.get(f'insight_{i}_{j}', '') for j in range(2)]
+        if i == 0:
+            bullets = [text for text in bullets if text]
         size = 18
         while size >= 14:
             rows = [wrap(t,size,327) for t in bullets]
             leading = size*1.28
-            height = sum(len(r) for r in rows)*leading+9
+            height = sum(len(r) for r in rows)*leading+9*(len(rows)-1)
             if height <= 142:
                 break
             size -= .5
@@ -112,9 +114,12 @@ def pdf():
         fields += [(f'place_{i}',LIMITS['place']) for i in range(3)]
         fields += [(f'insight_{i}_{j}',LIMITS['insight']) for i in range(3) for j in range(2)]
         for key,limit in fields:
-            if not data.get(key) or len(data[key])>limit:
+            optional = key == 'insight_0_1'
+            if (not optional and not data.get(key)) or len(data.get(key, ''))>limit:
                 raise ValueError(f'모든 항목을 입력하고 글자 수 제한을 확인해주세요. ({key})')
         photos = [request.files[f'photo_{i}'].read() if request.files.get(f'photo_{i}') else None for i in range(3)]
+        if any(not photo for photo in photos):
+            raise ValueError('활동 사진 1, 2, 3을 모두 첨부해주세요.')
         result = generate(data,photos)
     except (ValueError,UnidentifiedImageError,Image.DecompressionBombError) as error:
         return str(error),400
